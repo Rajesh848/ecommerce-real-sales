@@ -7,6 +7,12 @@ import { useBasket, toLines } from "@/game/basket";
 import { COUPONS, computeTotals, inr } from "@/game/pricing";
 import { sfx } from "@/game/sfx";
 import { TotalsRows } from "@/components/shop/BasketSheet";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { refreshCatalog, useCatalogVersion } from "@/hooks/use-catalog";
+import { fetchAddresses, formatAddress } from "@/lib/orders";
 
 export const Route = createFileRoute("/checkout")({
   ssr: false,
@@ -36,6 +42,11 @@ function Checkout() {
   const [method, setMethod] = useState("UPI QR");
   const [paying, setPaying] = useState(false);
   const nav = useNavigate();
+  useCatalogVersion((s) => s.v);
+  const { user } = useAuth();
+  const addresses = useQuery({ queryKey: ["addresses", user?.id], queryFn: fetchAddresses, enabled: !!user });
+  const [addrId, setAddrId] = useState<string | null>(null);
+  const chosen = addresses.data?.find((a) => a.id === addrId) ?? addresses.data?.[0];
   const t = computeTotals(toLines(items), coupon || undefined);
 
   // POS "scans" each line one by one
@@ -45,8 +56,22 @@ function Checkout() {
     return () => clearTimeout(id);
   }, [scanned, t.lines.length]);
 
-  const pay = () => {
+  const pay = async () => {
     setPaying(true);
+    if (user) {
+      const { data, error } = await supabase.rpc("place_order", {
+        _items: Object.entries(items).map(([productId, qty]) => ({ productId, qty })),
+        _coupon: coupon || "",
+        _method: method,
+        _address: chosen ? { label: chosen.label, full_name: chosen.full_name, phone: chosen.phone, text: formatAddress(chosen) } : null,
+      });
+      if (error || !data) { setPaying(false); sfx.error(); toast.error(error?.message ?? "Order failed"); void refreshCatalog(); return; }
+      useBasket.getState().clear();
+      void refreshCatalog();
+      sfx.pay();
+      nav({ to: "/receipt/$orderId", params: { orderId: data } });
+      return;
+    }
     setTimeout(() => {
       const order = placeTestOrder(method);
       sfx.pay();
@@ -95,6 +120,23 @@ function Checkout() {
               {t.couponError && <p className="mt-1 text-sm text-destructive">{t.couponError}</p>}
               {t.coupon && <p className="mt-1 text-sm text-success">✓ {t.coupon.code} applied — you save {inr(t.couponDiscount)}</p>}
               <p className="mt-2 text-xs text-muted-foreground">Try: {COUPONS.map((c) => c.code).join(", ")}</p>
+            </div>
+
+            <div className="rounded-2xl bg-card p-4">
+              <h2 className="font-bold">Delivery address</h2>
+              {!user ? (
+                <p className="mt-1 text-sm text-muted-foreground">Shopping as a guest. <Link to="/auth" search={{ redirect: "/checkout" }} className="font-semibold text-primary">Sign in</Link> to save this order to your account.</p>
+              ) : addresses.data?.length ? (
+                <div className="mt-2 space-y-2">
+                  {addresses.data.map((a) => (
+                    <button key={a.id} onClick={() => setAddrId(a.id)} className={`w-full rounded-xl border-2 p-3 text-left text-sm ${chosen?.id === a.id ? "border-primary bg-primary/5" : "border-border"}`}>
+                      <b>{a.label}</b> · {a.full_name}<div className="text-muted-foreground">{formatAddress(a)}</div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">No saved address. <Link to="/account" className="font-semibold text-primary">Add one</Link> or pick up in store.</p>
+              )}
             </div>
 
             <div className="rounded-2xl bg-card p-4">
