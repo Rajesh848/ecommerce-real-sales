@@ -226,7 +226,7 @@ function Building() {
   const d = STORE.maxZ - STORE.minZ;
   const cx = (STORE.maxX + STORE.minX) / 2;
   const cz = (STORE.maxZ + STORE.minZ) / 2;
-  const lights = [];
+  const lights: [number, number][] = [];
   for (let x = -18; x <= 18; x += 4) for (let z = -20; z <= 8; z += 4) lights.push([x, z]);
   return (
     <group>
