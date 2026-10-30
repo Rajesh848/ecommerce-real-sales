@@ -5,3 +5,6 @@
 - [ ] Lovable Cloud: accounts, products/orders tables, cart sync, stock updates — waiting on user go-ahead
 - [ ] Admin dashboard with charts — needs Cloud
 - [ ] Real Razorpay payments + server verification — needs user's Razorpay keys
+- [ ] AI meal/shopping assistant recommending products + quantities
+- [ ] Customer accounts: profile, saved addresses, order history
+- [ ] Admin dashboard: sales charts, price/discount/stock management
