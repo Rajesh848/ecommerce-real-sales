@@ -9,7 +9,7 @@ export interface Order {
   createdAt: string;
   method: string;
   status: "TEST_PAID";
-  coupon?: string;
+  coupon?: string | undefined;
   items: { productId: string; qty: number }[];
 }
 

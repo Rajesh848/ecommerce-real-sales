@@ -30,8 +30,8 @@ export interface Totals {
   itemSavings: number;
   subtotal: number;
   couponDiscount: number;
-  coupon?: Coupon;
-  couponError?: string;
+  coupon?: Coupon | undefined;
+  couponError?: string | undefined;
   gst: number;
   grandTotal: number;
   itemCount: number;

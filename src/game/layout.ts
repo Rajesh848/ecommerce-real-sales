@@ -19,7 +19,7 @@ export interface Face {
 // 9 categories on the 10 shelf faces; the outer east face of the last row stays plain.
 export const FACES: Face[] = CATEGORIES.map((c, i) => ({
   categoryId: c.id,
-  rowX: ROW_X[Math.floor(i / 2)],
+  rowX: ROW_X[Math.floor(i / 2)]!,
   side: i % 2 === 0 ? -1 : 1,
 }));
 

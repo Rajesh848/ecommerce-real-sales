@@ -56,7 +56,7 @@ function ProductStack({ p }: { p: Product }) {
       }
     m.instanceMatrix.needsUpdate = true;
     m.computeBoundingSphere();
-    m.userData.productId = p.id;
+    m.userData["productId"] = p.id;
     productMeshes.push(m);
     return () => void productMeshes.splice(productMeshes.indexOf(m), 1);
   }, [p]);
@@ -115,7 +115,7 @@ function AisleSigns() {
   return (
     <>
       {FACES.map((f, i) => {
-        const { tex } = signs[i];
+        const tex = signs[i]!.tex;
         return (
           <group key={f.categoryId}>
             {/* end-cap sign facing the entrance */}
@@ -126,7 +126,7 @@ function AisleSigns() {
             {/* sign along the aisle, facing the shoppers */}
             <mesh position={[f.rowX + f.side * 0.7, 2.75, (ROW_Z0 + ROW_Z1) / 2]} rotation={[0, f.side * (Math.PI / 2), 0]}>
               <planeGeometry args={[3.6, 0.9]} />
-              <meshBasicMaterial map={tex} toneMapped={false} side={THREE.DoubleSide} />
+              <meshBasicMaterial map={tex} toneMapped={false} />
             </mesh>
           </group>
         );
@@ -354,7 +354,7 @@ function PlayerRig() {
     if (++frame.current % 8 === 0) {
       ray.setFromCamera(center, camera);
       const hit = ray.intersectObjects(productMeshes, false)[0];
-      const id = (hit?.object.userData.productId as string) ?? null;
+      const id = (hit?.object.userData["productId"] as string) ?? null;
       if (id !== ui.hoveredId) ui.setHovered(id);
     }
   });
