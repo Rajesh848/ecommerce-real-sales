@@ -31,7 +31,7 @@ function Account() {
   const signOut = async () => {
     await qc.cancelQueries(); qc.clear();
     await supabase.auth.signOut();
-    nav({ to: "/auth", replace: true });
+    nav({ to: "/auth", search: { redirect: undefined }, replace: true });
   };
   return (
     <main className="min-h-screen bg-secondary">
@@ -84,10 +84,10 @@ function Addresses({ userId }: { userId: string }) {
   const [form, setForm] = useState<typeof EMPTY | null>(null);
   const save = async () => {
     if (!form) return;
-    if (!/^\d{6}$/.test(form.pincode)) return toast.error("PIN code must be 6 digits");
-    if (!/^[6-9]\d{9}$/.test(form.phone)) return toast.error("Enter a valid 10-digit mobile number");
+    if (!/^\d{6}$/.test(form.pincode)) return void toast.error("PIN code must be 6 digits");
+    if (!/^[6-9]\d{9}$/.test(form.phone)) return void toast.error("Enter a valid 10-digit mobile number");
     const { error } = await supabase.from("addresses").insert({ ...form, user_id: userId, is_default: !data?.length });
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     setForm(null); qc.invalidateQueries({ queryKey: ["addresses"] }); toast.success("Address saved");
   };
   const makeDefault = async (id: string) => {
@@ -137,7 +137,7 @@ function Profile({ userId }: { userId: string }) {
   const v = edit ?? { full_name: data?.full_name ?? "", phone: data?.phone ?? "", dietary_prefs: data?.dietary_prefs ?? "" };
   const save = async () => {
     const { error } = await supabase.from("profiles").update(v).eq("id", userId);
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     toast.success("Profile saved"); setEdit(null); refetch();
   };
   return (

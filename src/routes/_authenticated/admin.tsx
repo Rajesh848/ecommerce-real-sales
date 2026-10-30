@@ -135,7 +135,7 @@ function Stock({ rows }: { rows: ProductDb[] }) {
     if (!d) return;
     const upd = { ...d, updated_at: new Date().toISOString() };
     const { error } = await supabase.from("products").update(upd).eq("id", r.id);
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     toast.success(`${r.name} updated`);
     setDraft((x) => { const n = { ...x }; delete n[r.id]; return n; });
     qc.invalidateQueries({ queryKey: ["admin-products"] });
