@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, HelpCircle, Home, Search, ShoppingBasket, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CATEGORIES, PRODUCTS, categoryById, productById } from "@/game/catalog";
+import { PRODUCTS, categoryById, productById } from "@/game/catalog";
 import { COUNTERS, FACES, ROW_X, ROW_Z0, ROW_Z1, STORE, productSlot, standPoint } from "@/game/layout";
 import { input, player, teleport, useUi } from "@/game/runtime";
 import { useBasket, toLines } from "@/game/basket";
@@ -226,5 +226,3 @@ function MovePad() {
   );
 }
 
-// Re-export for search friendliness
-export { CATEGORIES };
