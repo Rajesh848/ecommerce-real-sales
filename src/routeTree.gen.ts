@@ -10,9 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AislesRouteImport } from './routes/aisles'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as StoreRouteImport } from './routes/store'
+import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as ReceiptOrderIdRouteImport } from './routes/receipt.$orderId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -20,9 +23,18 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AislesRoute = AislesRouteImport.update({
   id: '/aisles',
   path: '/aisles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -35,6 +47,11 @@ const StoreRoute = StoreRouteImport.update({
   path: '/store',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ReceiptOrderIdRoute = ReceiptOrderIdRouteImport.update({
   id: '/receipt/$orderId',
   path: '/receipt/$orderId',
@@ -44,37 +61,68 @@ const ReceiptOrderIdRoute = ReceiptOrderIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/aisles': typeof AislesRoute
+  '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/store': typeof StoreRoute
+  '/account': typeof AuthenticatedAccountRoute
   '/receipt/$orderId': typeof ReceiptOrderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/aisles': typeof AislesRoute
+  '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/store': typeof StoreRoute
+  '/account': typeof AuthenticatedAccountRoute
   '/receipt/$orderId': typeof ReceiptOrderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/aisles': typeof AislesRoute
+  '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/store': typeof StoreRoute
+  '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/receipt/$orderId': typeof ReceiptOrderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/aisles' | '/checkout' | '/store' | '/receipt/$orderId'
+  fullPaths:
+    | '/'
+    | '/aisles'
+    | '/auth'
+    | '/checkout'
+    | '/store'
+    | '/account'
+    | '/receipt/$orderId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/aisles' | '/checkout' | '/store' | '/receipt/$orderId'
+  to:
+    | '/'
+    | '/aisles'
+    | '/auth'
+    | '/checkout'
+    | '/store'
+    | '/account'
+    | '/receipt/$orderId'
   id:
-    '__root__' | '/' | '/aisles' | '/checkout' | '/store' | '/receipt/$orderId'
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/aisles'
+    | '/auth'
+    | '/checkout'
+    | '/store'
+    | '/_authenticated/account'
+    | '/receipt/$orderId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AislesRoute: typeof AislesRoute
+  AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   StoreRoute: typeof StoreRoute
   ReceiptOrderIdRoute: typeof ReceiptOrderIdRoute
@@ -89,11 +137,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/aisles': {
       id: '/aisles'
       path: '/aisles'
       fullPath: '/aisles'
       preLoaderRoute: typeof AislesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -110,6 +172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/receipt/$orderId': {
       id: '/receipt/$orderId'
       path: '/receipt/$orderId'
@@ -120,9 +189,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AislesRoute: AislesRoute,
+  AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   StoreRoute: StoreRoute,
   ReceiptOrderIdRoute: ReceiptOrderIdRoute,
