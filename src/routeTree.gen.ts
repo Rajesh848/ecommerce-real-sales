@@ -10,11 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AislesRouteImport } from './routes/aisles'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as StoreRouteImport } from './routes/store'
+import { Route as ReceiptOrderIdRouteImport } from './routes/receipt.$orderId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AislesRoute = AislesRouteImport.update({
+  id: '/aisles',
+  path: '/aisles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoreRoute = StoreRouteImport.update({
@@ -22,31 +35,49 @@ const StoreRoute = StoreRouteImport.update({
   path: '/store',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReceiptOrderIdRoute = ReceiptOrderIdRouteImport.update({
+  id: '/receipt/$orderId',
+  path: '/receipt/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/aisles': typeof AislesRoute
+  '/checkout': typeof CheckoutRoute
   '/store': typeof StoreRoute
+  '/receipt/$orderId': typeof ReceiptOrderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/aisles': typeof AislesRoute
+  '/checkout': typeof CheckoutRoute
   '/store': typeof StoreRoute
+  '/receipt/$orderId': typeof ReceiptOrderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/aisles': typeof AislesRoute
+  '/checkout': typeof CheckoutRoute
   '/store': typeof StoreRoute
+  '/receipt/$orderId': typeof ReceiptOrderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/store'
+  fullPaths: '/' | '/aisles' | '/checkout' | '/store' | '/receipt/$orderId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/store'
-  id: '__root__' | '/' | '/store'
+  to: '/' | '/aisles' | '/checkout' | '/store' | '/receipt/$orderId'
+  id:
+    '__root__' | '/' | '/aisles' | '/checkout' | '/store' | '/receipt/$orderId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AislesRoute: typeof AislesRoute
+  CheckoutRoute: typeof CheckoutRoute
   StoreRoute: typeof StoreRoute
+  ReceiptOrderIdRoute: typeof ReceiptOrderIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +89,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aisles': {
+      id: '/aisles'
+      path: '/aisles'
+      fullPath: '/aisles'
+      preLoaderRoute: typeof AislesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/store': {
       id: '/store'
       path: '/store'
@@ -65,12 +110,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/receipt/$orderId': {
+      id: '/receipt/$orderId'
+      path: '/receipt/$orderId'
+      fullPath: '/receipt/$orderId'
+      preLoaderRoute: typeof ReceiptOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AislesRoute: AislesRoute,
+  CheckoutRoute: CheckoutRoute,
   StoreRoute: StoreRoute,
+  ReceiptOrderIdRoute: ReceiptOrderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
