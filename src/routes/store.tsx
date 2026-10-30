@@ -101,7 +101,7 @@ function StorePage() {
         </div>
       )}
       <AssistantSheet open={assist} onOpenChange={setAssist} />
-      <Button className="absolute left-3 top-16 bg-accent text-accent-foreground shadow-pop hover:bg-accent/90" onClick={() => setAssist(true)}><Sparkles /> Ask the assistant</Button>
+      <Button className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground shadow-pop hover:bg-accent/90" onClick={() => setAssist(true)}><Sparkles /> Ask the assistant</Button>
       <BasketSheet open={basketOpen} onOpenChange={(v) => useUi.getState().setBasketOpen(v)} />
       <HelpToggle onClick={() => setHelp(true)} />
     </div>
