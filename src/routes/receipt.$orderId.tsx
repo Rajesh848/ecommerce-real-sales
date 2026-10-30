@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useBasket, toLines } from "@/game/basket";
 import { computeTotals, inr } from "@/game/pricing";
 import { downloadReceiptPdf } from "@/game/receipt";
+import { useQuery } from "@tanstack/react-query";
+import { fetchOrder } from "@/lib/orders";
+import { productById, type Product } from "@/game/catalog";
+import type { Order } from "@/game/basket";
 
 export const Route = createFileRoute("/receipt/$orderId")({
   ssr: false,
@@ -20,10 +24,22 @@ export const Route = createFileRoute("/receipt/$orderId")({
 
 function Receipt() {
   const { orderId } = Route.useParams();
-  const order = useBasket((s) => s.orders.find((o) => o.id === orderId));
+  const local = useBasket((s) => s.orders.find((o) => o.id === orderId));
+  const remote = useQuery({ queryKey: ["order", orderId], queryFn: () => fetchOrder(orderId), enabled: !local });
+  if (!local && remote.isLoading) return <main className="grid min-h-screen place-items-center text-muted-foreground">Loading receipt…</main>;
+  const db = remote.data;
+  // Saved orders keep the prices charged at the time, not today's prices.
+  const order: Order | undefined = local ?? (db ? {
+    id: db.id, txnId: db.txn_id, createdAt: db.created_at, method: db.payment_method, status: "TEST_PAID",
+    coupon: db.coupon ?? undefined, items: db.order_items.map((i) => ({ productId: i.product_id, qty: i.qty })),
+  } : undefined);
+  const snapshot = db ? db.order_items.map((i) => ({
+    product: { ...(productById(i.product_id) as Product), name: i.name, mrp: Number(i.mrp), discountPct: Number(i.mrp) ? Math.round((1 - Number(i.unit_price) / Number(i.mrp)) * 10000) / 100 : 0, gstRate: Number(i.gst_rate) },
+    qty: i.qty,
+  })) : null;
   if (!order)
     return <main className="grid min-h-screen place-items-center"><div className="text-center"><h1 className="text-2xl font-bold">Receipt not found</h1><Button asChild className="mt-4"><Link to="/">Home</Link></Button></div></main>;
-  const t = computeTotals(toLines(order.items), order.coupon);
+  const t = computeTotals(snapshot ?? toLines(order.items), order.coupon);
   const Row = ({ k, v, b }: { k: string; v: string; b?: boolean }) => <div className={`flex justify-between ${b ? "font-bold" : ""}`}><span>{k}</span><span>{v}</span></div>;
   return (
     <main className="min-h-screen bg-secondary px-4 py-10">
@@ -55,7 +71,7 @@ function Receipt() {
           <div className="pt-2 text-lg"><Row k="TOTAL" v={inr(t.grandTotal)} b /></div>
         </div>
         <div className="mt-6 grid gap-2 font-sans">
-          <Button size="lg" onClick={() => downloadReceiptPdf(order)}><Download /> Download receipt (PDF)</Button>
+          <Button size="lg" onClick={() => downloadReceiptPdf(order, snapshot ?? undefined)}><Download /> Download receipt (PDF)</Button>
           <Button asChild size="lg" variant="outline"><Link to="/store">Continue shopping</Link></Button>
         </div>
       </div>

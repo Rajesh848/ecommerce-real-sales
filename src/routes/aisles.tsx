@@ -8,6 +8,9 @@ import { useBasket, toLines } from "@/game/basket";
 import { computeTotals, inr, sellingPrice } from "@/game/pricing";
 import { PackShot, StockBadge, addToBasket } from "@/components/shop/ProductCard";
 import { BasketSheet } from "@/components/shop/BasketSheet";
+import { AssistantSheet } from "@/components/shop/AssistantSheet";
+import { useCatalogVersion } from "@/hooks/use-catalog";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/aisles")({
   ssr: false,
@@ -26,6 +29,8 @@ function Aisles() {
   const [cat, setCat] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const [assist, setAssist] = useState(false);
+  useCatalogVersion((s) => s.v);
   const items = useBasket((s) => s.items);
   const t = computeTotals(toLines(items));
   const list = PRODUCTS.filter((p) => (!cat || p.categoryId === cat) && (p.name + p.brand).toLowerCase().includes(q.toLowerCase()));
@@ -35,6 +40,7 @@ function Aisles() {
         <Link to="/" className="font-display text-xl font-extrabold text-primary">🛒 FreshMart</Link>
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products" className="max-w-xs" />
         <Button asChild variant="outline" className="ml-auto hidden sm:flex"><Link to="/store"><Store /> 3D store</Link></Button>
+        <Button variant="outline" onClick={() => setAssist(true)}><Sparkles /> Assistant</Button>
         <Button onClick={() => setOpen(true)}><ShoppingBasket /> {t.itemCount} · {inr(t.grandTotal)}</Button>
       </header>
       <div className="flex gap-2 overflow-x-auto px-4 py-3">
@@ -56,6 +62,7 @@ function Aisles() {
         ))}
       </div>
       <BasketSheet open={open} onOpenChange={setOpen} />
+      <AssistantSheet open={assist} onOpenChange={setAssist} />
     </main>
   );
 }

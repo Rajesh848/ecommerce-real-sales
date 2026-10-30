@@ -1,12 +1,12 @@
 import type { Order } from "./basket";
 import { toLines } from "./basket";
-import { computeTotals } from "./pricing";
+import { computeTotals, type Line } from "./pricing";
 
 const rs = (n: number) => "Rs. " + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-export async function downloadReceiptPdf(order: Order) {
+export async function downloadReceiptPdf(order: Order, lines?: Line[]) {
   const { jsPDF } = await import("jspdf");
-  const t = computeTotals(toLines(order.items), order.coupon);
+  const t = computeTotals(lines ?? toLines(order.items), order.coupon);
   const doc = new jsPDF({ unit: "mm", format: [80, 120 + t.lines.length * 6] });
   let y = 10;
   const c = (s: string, size = 9, bold = false) => { doc.setFont("courier", bold ? "bold" : "normal"); doc.setFontSize(size); doc.text(s, 40, y, { align: "center" }); y += size * 0.5; };

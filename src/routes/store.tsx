@@ -11,6 +11,9 @@ import { computeTotals, inr, sellingPrice } from "@/game/pricing";
 import { isMuted, setMuted } from "@/game/sfx";
 import { ProductPanel } from "@/components/shop/ProductCard";
 import { BasketSheet } from "@/components/shop/BasketSheet";
+import { AssistantSheet } from "@/components/shop/AssistantSheet";
+import { useCatalogVersion } from "@/hooks/use-catalog";
+import { Sparkles, UserRound } from "lucide-react";
 
 const Supermarket = lazy(() => import("@/components/store3d/Supermarket"));
 
@@ -35,6 +38,8 @@ function StorePage() {
   const nearCheckout = useUi((s) => s.nearCheckout);
   const basketOpen = useUi((s) => s.basketOpen);
   const viewed = useBasket((s) => s.viewed);
+  const [assist, setAssist] = useState(false);
+  useCatalogVersion((s) => s.v);
 
   useEffect(() => { if (selectedId) viewed(selectedId); }, [selectedId, viewed]);
   useEffect(() => () => { useUi.getState().select(null); }, []);
@@ -95,6 +100,8 @@ function StorePage() {
           </div>
         </div>
       )}
+      <AssistantSheet open={assist} onOpenChange={setAssist} />
+      <Button className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground shadow-pop hover:bg-accent/90" onClick={() => setAssist(true)}><Sparkles /> Ask the assistant</Button>
       <BasketSheet open={basketOpen} onOpenChange={(v) => useUi.getState().setBasketOpen(v)} />
       <HelpToggle onClick={() => setHelp(true)} />
     </div>
@@ -147,6 +154,7 @@ function TopBar() {
         )}
       </div>
       <div className="ml-auto flex gap-2">
+        <Button asChild size="icon" variant="secondary" className="shadow-hud" aria-label="My account"><Link to="/account"><UserRound /></Link></Button>
         <Button size="icon" variant="secondary" className="shadow-hud" onClick={() => { setMuted(!muted); setM(!muted); }} aria-label="Toggle sound">{muted ? <VolumeX /> : <Volume2 />}</Button>
         <button
           key={bump}

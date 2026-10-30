@@ -132,3 +132,28 @@ export const PRODUCTS: Product[] = Object.entries(RAW).flatMap(([categoryId, row
 export const productById = (id: string) => PRODUCTS.find((p) => p.id === id);
 export const categoryById = (id: string) => CATEGORIES.find((c) => c.id === id);
 export const LOW_STOCK = 8;
+
+export interface ProductRow {
+  id: string;
+  name: string;
+  brand: string;
+  mrp: number;
+  discount_pct: number;
+  gst_rate: number;
+  stock: number;
+  active: boolean;
+}
+
+/** Live prices/stock from the database override the bundled sample values. */
+export function applyProductRows(rows: ProductRow[]) {
+  for (const r of rows) {
+    const p = PRODUCTS.find((x) => x.id === r.id);
+    if (!p) continue;
+    p.name = r.name;
+    p.brand = r.brand;
+    p.mrp = Number(r.mrp);
+    p.discountPct = Number(r.discount_pct);
+    p.gstRate = Number(r.gst_rate);
+    p.stock = r.active ? r.stock : 0;
+  }
+}

@@ -29,7 +29,8 @@ function Welcome() {
           <header className="flex items-center gap-2">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent text-xl">🛒</span>
             <span className="font-display text-2xl font-extrabold">FreshMart</span>
-            <span className="ml-auto flex items-center gap-1 text-sm opacity-90"><Clock className="h-4 w-4" /> Open daily · 7:00 AM – 11:00 PM</span>
+            <span className="ml-auto hidden items-center gap-1 text-sm opacity-90 sm:flex"><Clock className="h-4 w-4" /> Open daily · 7:00 AM – 11:00 PM</span>
+            <Link to="/account" className="ml-auto rounded-full bg-primary-foreground/15 px-4 py-1.5 text-sm font-semibold sm:ml-4">My account</Link>
           </header>
           <div className="max-w-2xl py-16">
             <p className="mb-3 inline-block rounded-full bg-primary-foreground/15 px-3 py-1 text-sm">Your neighbourhood supermarket, in 3D</p>
