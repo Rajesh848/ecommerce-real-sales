@@ -1,13 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { CATEGORIES, PRODUCTS } from "@/game/catalog";
 import { sellingPrice } from "@/game/pricing";
 
-const Input = z.object({ request: z.string().trim().min(3).max(500), prefs: z.string().max(200).default("") });
+const Input = z.object({ request: z.string().trim().min(3).max(500) });
 
 export const recommendProducts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { data: prof } = await context.supabase.from("profiles").select("dietary_prefs").eq("id", context.userId).maybeSingle();
+    const prefs = prof?.dietary_prefs ?? "";
     const { recommend } = await import("./ai/assistant.server");
     // Live stock/prices from the database (public read).
     const { createClient } = await import("@supabase/supabase-js");
@@ -38,7 +42,7 @@ export const recommendProducts = createServerFn({ method: "POST" })
     }).filter((p) => p.stock > 0);
 
     try {
-      const rec = await recommend(data.request, data.prefs, catalog);
+      const rec = await recommend(data.request, prefs, catalog);
       const byId = new Map(catalog.map((c) => [c.id, c]));
       const items = rec.items
         .filter((i) => byId.has(i.productId))

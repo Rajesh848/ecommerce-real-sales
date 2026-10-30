@@ -289,7 +289,7 @@ function PlayerRig() {
       input.turn = (k("ArrowRight") ? 1 : 0) - (k("ArrowLeft") ? 1 : 0);
     };
     const down = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.tagName === "INPUT") return;
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) return;
       if (e.code === "KeyE") {
         const h = useUi.getState().hoveredId;
         if (h) useUi.getState().select(h);

@@ -11,12 +11,15 @@ import { useBasket } from "@/game/basket";
 import { sfx } from "@/game/sfx";
 import { recommendProducts } from "@/lib/assistant.functions";
 import { PackShot } from "./ProductCard";
+import { Link } from "@tanstack/react-router";
+import { useAuth } from "@/hooks/use-auth";
 
 const EXAMPLES = ["Paneer butter masala for 4 people", "Breakfast for a week for two", "Monthly cleaning supplies for a 2BHK", "Snacks for a cricket night with 6 friends"];
 
 type Result = { summary: string; items: { productId: string; qty: number; reason: string }[]; missing: string[] };
 
-export function AssistantSheet({ open, onOpenChange, prefs = "" }: { open: boolean; onOpenChange: (v: boolean) => void; prefs?: string }) {
+export function AssistantSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { user, loading } = useAuth();
   const run = useServerFn(recommendProducts);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -27,7 +30,7 @@ export function AssistantSheet({ open, onOpenChange, prefs = "" }: { open: boole
     if (q.trim().length < 3) return;
     setText(q); setBusy(true); setErr(null); setRes(null);
     try {
-      const r = await run({ data: { request: q, prefs } });
+      const r = await run({ data: { request: q } });
       if (r.ok) setRes(r); else setErr(r.error);
     } catch {
       setErr("The assistant couldn't answer right now.");
@@ -57,6 +60,12 @@ export function AssistantSheet({ open, onOpenChange, prefs = "" }: { open: boole
       <SheetContent side="left" className="flex w-full flex-col sm:max-w-md">
         <SheetHeader><SheetTitle className="flex items-center gap-2 font-display text-2xl"><Sparkles className="text-accent" /> Shopping assistant</SheetTitle></SheetHeader>
         <p className="text-sm text-muted-foreground">Tell me what you're cooking or what you need — I'll pick products and quantities from our shelves.</p>
+        {!loading && !user ? (
+          <div className="rounded-xl bg-muted p-4 text-sm">
+            <p>Sign in to use the assistant — it also remembers your shopping preferences.</p>
+            <Button asChild className="mt-3" size="sm"><Link to="/auth" search={{ redirect: "/store" }}>Sign in</Link></Button>
+          </div>
+        ) : (<>
         <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Dinner for 4: dal, rice and a sabzi" rows={3} maxLength={500}
           onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void ask(); } }} />
         <Button onClick={() => ask()} disabled={busy || text.trim().length < 3}>{busy ? "Thinking…" : "Suggest products"}</Button>
@@ -87,6 +96,7 @@ export function AssistantSheet({ open, onOpenChange, prefs = "" }: { open: boole
           </div>
         )}
         {res && res.items.length > 0 && <Button size="lg" onClick={addAll}>Add all to basket · {inr(total)}</Button>}
+        </>)}
       </SheetContent>
     </Sheet>
   );
